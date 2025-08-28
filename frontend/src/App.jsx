@@ -63,7 +63,7 @@ function App() {
         <ul className="mt-4 space-y-3 w-full max-w-md">
           {todos.map((t, i) => (
             <li
-              className="flex justify-between item-center bg-white px-4 py-2 rounded-lg shadow"
+              className="flex justify-between item-center bg-white px-5 py-2 rounded-lg shadow"
               key={i}
             >
               {t}{" "}
