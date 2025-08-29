@@ -5,9 +5,20 @@ function App() {
   const [todos, setTodos] = useState([]);
   const inputFocus = useRef(null);
 
-  const add = () => {
+  const add = async () => {
     if (task.trim() === "") return;
-    setTodos([...todos, task]);
+
+    const res = await fetch("http://localhost:8000/todos", {
+      method: "POST",
+      headers: {
+        'Content-Type': "application/json",
+      },
+      body: JSON.stringify({taskName:task}),
+    });
+
+    const newTodo = await res.json();
+
+    setTodos([...todos, newTodo]);
     setTask("");
   };
 
@@ -29,11 +40,16 @@ function App() {
   }, [todos]);
 
   useEffect(() => {
-    let storage = localStorage.getItem("todos");
+    // let storage = localStorage.getItem("todos");
 
-    if (storage) {
-      setTodos(JSON.parse(storage));
-    }
+    // if (storage) {
+    //   setTodos(JSON.parse(storage));
+    // }
+
+    fetch("http://localhost:8000/todos")
+    .then((res)=>res.json())
+    .then((data)=>setTodos(data))
+    .catch((err)=>console.log(`Error fetching todos ${err}`))
   }, []);
 
   return (
@@ -61,15 +77,15 @@ function App() {
         </div>
 
         <ul className="mt-4 space-y-3 w-full max-w-md">
-          {todos.map((t, i) => (
+          {todos.map((t) => (
             <li
               className="flex justify-between item-center bg-white px-4 py-2 rounded-lg shadow"
-              key={i}
+              key={t._id}
             >
-              {t}{" "}
+              {t.taskName}{" "}
               <button
                 className="bg-red-500 text-white px-3  py-1 rounded-md text-sm hover:bg-red-600 transition"
-                onClick={() => deleteTask(i)}
+                onClick={() => deleteTask(t._id)}
               >
                 delete
               </button>
