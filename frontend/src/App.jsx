@@ -22,10 +22,42 @@ function App() {
     setTask("");
   };
 
-  const deleteTask = (index) => {
-    const newTodos = todos.filter((_, i) => i !== index);
-    setTodos(newTodos);
+const deleteTask = async(index) => {
+    try{
+    const res = await fetch(`http://localhost:8000/todos/${index}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
+    if(!res.ok) throw new Error("Failed to delete")
+    
+    setTodos(todos.filter(todo=> todo._id !== index));
+}catch(err){
+  console.log(err)
+}
   };
+
+const handleEdit = async(id, newText) =>{
+  try{
+    const res = await fetch(`http://localhost:8000/todos/${id}`,{
+      method: 'PUT',
+      headers: {
+        'Content-Type':'application/json'
+      },
+      body: JSON.stringify({taskName: newText}),
+    })
+    if(!res.ok) throw new Error("Failed to Edit")
+
+      setTodos(
+        todos.map((t)=>(
+           t._id === id?{...t, taskName: newText }:t
+        ))
+      )
+  }catch(err){
+    console.log(err);
+  }
+}
 
   useEffect(() => {
     if (inputFocus.current) {
@@ -78,18 +110,23 @@ function App() {
 
         <ul className="mt-4 space-y-3 w-full max-w-md">
           {todos.map((t) => (
+            <div className="flex gap-2" key={t._id}>
             <li
-              className="flex justify-between item-center bg-white px-4 py-2 rounded-lg shadow"
-              key={t._id}
+              className="flex-1 bg-white px-4 py-2 rounded-lg shadow"
+              contentEditable
+              suppressContentEditableWarning={true}
+              onBlur={(e)=> handleEdit(t._id, e.target.innerText)}
+              
             >
               {t.taskName}{" "}
+              </li>
               <button
                 className="bg-red-500 text-white px-3  py-1 rounded-md text-sm hover:bg-red-600 transition"
                 onClick={() => deleteTask(t._id)}
               >
                 delete
               </button>
-            </li>
+            </div>
           ))}
         </ul>
       </div>
